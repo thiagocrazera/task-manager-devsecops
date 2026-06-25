@@ -1,0 +1,9 @@
+services:
+  task-manager:
+    build: .
+    container_name: task-manager-devsecops
+    ports:
+      - "5000:5000"
+    environment:
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: admin123
