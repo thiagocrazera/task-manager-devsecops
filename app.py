@@ -4,7 +4,7 @@ import secrets
 from functools import wraps
 from logging.handlers import SysLogHandler
 
-from flask import Flask, redirect, request, session, url_for
+from flask import Flask, Response, redirect, request, session, url_for
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY") or secrets.token_hex(32)
@@ -141,6 +141,19 @@ def delete_task(index):
 @app.route("/health")
 def health():
     return {"status": "ok", "service": "task-manager-devsecops"}
+
+
+@app.route("/metrics")
+def metrics():
+    content = [
+        "# HELP task_manager_tasks_total Total de tarefas cadastradas",
+        "# TYPE task_manager_tasks_total gauge",
+        f"task_manager_tasks_total {len(tasks)}",
+        "# HELP task_manager_app_info Informacoes da aplicacao",
+        "# TYPE task_manager_app_info gauge",
+        'task_manager_app_info{service="task-manager-devsecops"} 1',
+    ]
+    return Response("\n".join(content) + "\n", mimetype="text/plain")
 
 
 if __name__ == "__main__":
