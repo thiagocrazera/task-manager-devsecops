@@ -46,3 +46,22 @@ jobs:
         run: |
           curl -f http://localhost:5000/health
           docker logs task-manager-stage --tail 20
+
+      - name: DAST pós-deploy com OWASP ZAP
+        run: |
+          mkdir -p zap-actions
+          docker run --rm -t \
+            --network host \
+            -v "$(pwd)/zap-actions:/zap/wrk/:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://127.0.0.1:5000 \
+            -r zap-stage-report.html \
+            -w zap-stage-report.md \
+            -I
+
+      - name: Publicar relatório ZAP como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-stage-report
+          path: zap-actions/
